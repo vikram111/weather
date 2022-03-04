@@ -1,0 +1,68 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:weatherdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password: password
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  h2:
+    console:
+      enabled: true
+  cache:
+    jcache:
+      config: classpath:ehcache.xml
+
+downstream:
+  service:
+    weatherOpenApi:
+      url: https://api.openweathermap.org/data/2.5/weather?q={city},{country}&appid={appid}
+      appKey: "replace with key before running"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+bucket4j:
+  enabled: true
+  filters:
+    - cache-name: buckets
+      url: /weather/description.*
+      strategy: first
+      http-response-body: "{ \"status\": 429, \"error\": \"Too Many Requests\", \"message\": \"You have exhausted your API Request Quota\" }"
+      rate-limits:
+        - expression: "getHeader('X-api-key')"
+          execute-condition: "getHeader('X-api-key').equals('USER001')"
+          bandwidths:
+            - capacity: 5
+              time: 1
+              unit: hours
+        - expression: "getHeader('X-api-key')"
+          execute-condition: "getHeader('X-api-key').equals('USER002')"
+          bandwidths:
+            - capacity: 5
+              time: 1
+              unit: hours
+        - expression: "getHeader('X-api-key')"
+          execute-condition: "getHeader('X-api-key').equals('USER003')"
+          bandwidths:
+            - capacity: 5
+              time: 1
+              unit: hours
+        - expression: "getHeader('X-api-key')"
+          execute-condition: "getHeader('X-api-key').equals('USER004')"
+          bandwidths:
+            - capacity: 5
+              time: 1
+              unit: hours
+        - expression: "getHeader('X-api-key')"
+          execute-condition: "getHeader('X-api-key').equals('USER005')"
+          bandwidths:
+            - capacity: 5
+              time: 1
+              unit: hours
